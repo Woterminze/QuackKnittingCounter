@@ -66,6 +66,16 @@ export function missedRows(rule: Rule, currentRow: number): number[] {
   return rows;
 }
 
+/** Ряды для чек-листа: срабатывания до текущего ряда и ahead следующих, не больше limit с конца. */
+export function checklistRows(rule: Rule, currentRow: number, ahead = 3, limit = 12): number[] {
+  const rows: number[] = [];
+  for (let row = rule.startRow; occurrenceOnRow(rule, row) !== null; row += rule.every) {
+    if (row > currentRow && ahead-- === 0) break;
+    rows.push(row);
+  }
+  return rows.slice(-limit);
+}
+
 /** Ближайшее срабатывание строго после ряда row. */
 export function nextHit(rule: Rule, row: number): NextHit | null {
   if (!rule.enabled) return null;
