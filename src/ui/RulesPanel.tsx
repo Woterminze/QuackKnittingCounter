@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import type { Project, Rule } from '../domain/types';
-import { isFinished, lastRow, previewRows, validateRuleInput, type RuleInput } from '../domain/rules';
-import { addRule, removeRule, updateRule } from '../domain/project';
+import { checklistRows, isDone, isFinished, lastRow, previewRows, validateRuleInput, type RuleInput } from '../domain/rules';
+import { addRule, removeRule, setRuleDone, updateRule } from '../domain/project';
 import { useStore } from './store';
 import { ConfirmDialog, Field } from './common';
 
@@ -45,6 +45,7 @@ export function RulesPanel({ project }: { project: Project }) {
         <ul className="rules" data-testid="rule-list">
           {project.rules.map((r) => {
             const finished = isFinished(r, project.currentRow);
+            const rows = checklistRows(r, project.currentRow);
             return (
               <li key={r.id} className={`rule ${!r.enabled || finished ? 'dim' : ''}`} data-testid="rule-item">
                 <div className="rule-main">
@@ -54,6 +55,28 @@ export function RulesPanel({ project }: { project: Project }) {
                   </span>
                   {r.hint && <span className="muted">{r.hint}</span>}
                   {finished && <span className="tag">выполнено</span>}
+                  {rows.length > 0 && (
+                    <div className="checklist" data-testid="rule-checklist">
+                      {rows.map((row) => {
+                        const done = isDone(r, row);
+                        const state = done ? 'on' : row < project.currentRow ? 'miss' : '';
+                        return (
+                          <button
+                            key={row}
+                            type="button"
+                            className={`check-chip ${state} ${row === project.currentRow ? 'now' : ''}`}
+                            disabled={row > project.currentRow}
+                            aria-pressed={done}
+                            aria-label={`Ряд ${row}: ${done ? 'сделано' : 'не отмечено'}`}
+                            onClick={() => update(project.id, (p) => setRuleDone(p, r.id, [row], !done))}
+                            data-testid="rule-check"
+                          >
+                            {done ? `✓ ${row}` : row}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
                 <div className="rule-actions">
                   <label className="switch" title={r.enabled ? 'Выключить' : 'Включить'}>

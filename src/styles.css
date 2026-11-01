@@ -228,6 +228,15 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .rules { list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 10px; }
 .rule { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
 .rule.dim { opacity: 0.55; }
+.checklist { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.check-chip {
+  min-width: 44px; min-height: 36px; padding: 0 8px; border-radius: 10px; cursor: pointer; font-weight: 700;
+  border: 1.5px solid var(--line); background: var(--surface-2); font-variant-numeric: tabular-nums;
+}
+.check-chip.miss { background: var(--accent-soft); border-color: var(--accent); }
+.check-chip.on { background: var(--pad); border-color: var(--green); color: var(--green-dark); }
+.check-chip.now { outline: 2px solid var(--green); outline-offset: 1px; }
+.check-chip:disabled { opacity: 0.5; cursor: default; }
 .rule-main { flex: 1; display: grid; gap: 2px; }
 .rule-actions { display: flex; align-items: center; gap: 4px; }
 .tag { justify-self: start; font-size: 0.75rem; font-weight: 700; padding: 1px 8px; border-radius: 99px; background: var(--pad); color: var(--green-dark); }
