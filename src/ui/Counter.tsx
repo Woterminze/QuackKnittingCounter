@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Project } from '../domain/types';
-import { hitsOnRow, pluralRows, upcomingHits } from '../domain/rules';
-import { decrementRow, incrementRow, patternPosition, setRow, MAX_ROW } from '../domain/project';
+import { hitsOnRow, isDone, missedRows, pluralRows, upcomingHits } from '../domain/rules';
+import { decrementRow, incrementRow, patternPosition, setRow, setRuleDone, MAX_ROW } from '../domain/project';
 import { useStore } from './store';
 import { Frog } from './Frog';
 
@@ -34,6 +34,7 @@ export function Counter({ project }: { project: Project }) {
   const row = project.currentRow;
   const hits = hitsOnRow(project.rules, row);
   const upcoming = upcomingHits(project.rules, row).slice(0, 3);
+  const missed = project.rules.map((rule) => ({ rule, rows: missedRows(rule, row) })).filter((m) => m.rows.length > 0);
   const prevRow = useRef(row);
   const [frogging, setFrogging] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -97,7 +98,9 @@ export function Counter({ project }: { project: Project }) {
             aria-label={`Ряд ${row}. Нажми, чтобы ввести вручную`}
             data-testid="row-number"
           >
-            {row}
+            <span className="row-value" key={row}>
+              {row}
+            </span>
           </button>
         )}
         {project.targetRows && (
@@ -120,19 +123,49 @@ export function Counter({ project }: { project: Project }) {
       </div>
 
       <div aria-live="polite" data-testid="reminders">
-        {hits.map((h) => (
-          <div className="reminder" key={`${h.rule.id}-${row}`} data-testid="reminder">
-            <Frog mood="alert" size={56} className="reminder-frog" />
-            <div>
-              <strong data-testid="reminder-action">В этом ряду: {h.rule.action}</strong>
-              <div className="muted" data-testid="reminder-count">
-                {h.total ? `${h.occurrence} из ${h.total}` : `${h.occurrence}-й раз`}
-                {h.rule.hint ? ` · ${h.rule.hint}` : ''}
+        {hits.map((h) => {
+          const done = isDone(h.rule, row);
+          return (
+            <div className={`reminder ${done ? 'done' : ''}`} key={`${h.rule.id}-${row}`} data-testid="reminder">
+              <Frog mood={done ? 'happy' : 'alert'} size={56} className="reminder-frog" />
+              <div className="reminder-text">
+                <strong data-testid="reminder-action">В этом ряду: {h.rule.action}</strong>
+                <div className="muted" data-testid="reminder-count">
+                  {h.total ? `${h.occurrence} из ${h.total}` : `${h.occurrence}-й раз`}
+                  {h.rule.hint ? ` · ${h.rule.hint}` : ''}
+                </div>
               </div>
+              <button
+                type="button"
+                className={`check-btn ${done ? 'on' : ''}`}
+                aria-pressed={done}
+                onClick={() => update(project.id, (p) => setRuleDone(p, h.rule.id, [row], !done))}
+                data-testid="reminder-done"
+              >
+                {done ? '✓ Сделано' : 'Сделано'}
+              </button>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+
+      {missed.length > 0 && (
+        <ul className="missed" data-testid="missed">
+          {missed.map(({ rule, rows }) => (
+            <li key={rule.id} data-testid="missed-item">
+              <div className="reminder-text">
+                <strong>Пропущено: {rule.action}</strong>
+                <div className="muted">
+                  {rows.length === 1 ? 'ряд' : 'ряды'} {rows.length > 5 ? `…, ${rows.slice(-5).join(', ')}` : rows.join(', ')}
+                </div>
+              </div>
+              <button type="button" className="check-btn" onClick={() => update(project.id, (p) => setRuleDone(p, rule.id, rows, true))} data-testid="missed-done">
+                Сделано
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
 
       <div className="counter-buttons">
         <button type="button" className={`btn-frog ${frogging ? 'frogging' : ''}`} onClick={minus} disabled={row <= 1} data-testid="row-minus">
