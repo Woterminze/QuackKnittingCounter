@@ -27,27 +27,27 @@ export function Frog({ mood = 'happy', size = 96, className, title }: Props) {
       <circle cx="82" cy="40" r="15" fill="var(--frog)" />
       {eyesClosed ? (
         <>
-          <path d="M31 42 Q38 47 45 42" stroke="var(--ink)" strokeWidth="3" fill="none" strokeLinecap="round" />
-          <path d="M75 42 Q82 47 89 42" stroke="var(--ink)" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <path d="M31 42 Q38 47 45 42" stroke="var(--frog-ink)" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <path d="M75 42 Q82 47 89 42" stroke="var(--frog-ink)" strokeWidth="3" fill="none" strokeLinecap="round" />
         </>
       ) : (
         <>
           <circle cx="38" cy="40" r="9" fill="#fff" />
           <circle cx="82" cy="40" r="9" fill="#fff" />
-          <circle cx={mood === 'sad' ? 37 : 40} cy={mood === 'sad' ? 43 : 42} r="4.5" fill="var(--ink)" />
-          <circle cx={mood === 'sad' ? 81 : 84} cy={mood === 'sad' ? 43 : 42} r="4.5" fill="var(--ink)" />
+          <circle cx={mood === 'sad' ? 37 : 40} cy={mood === 'sad' ? 43 : 42} r="4.5" fill="var(--frog-ink)" />
+          <circle cx={mood === 'sad' ? 81 : 84} cy={mood === 'sad' ? 43 : 42} r="4.5" fill="var(--frog-ink)" />
         </>
       )}
       <circle cx="33" cy="68" r="6" fill="var(--blush)" opacity=".75" />
       <circle cx="87" cy="68" r="6" fill="var(--blush)" opacity=".75" />
       {mood === 'happy' || mood === 'scarf' ? (
-        <path d="M45 66 Q60 79 75 66" stroke="var(--ink)" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+        <path d="M45 66 Q60 79 75 66" stroke="var(--frog-ink)" strokeWidth="3.5" fill="none" strokeLinecap="round" />
       ) : mood === 'sad' ? (
-        <path d="M47 74 Q60 64 73 74" stroke="var(--ink)" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+        <path d="M47 74 Q60 64 73 74" stroke="var(--frog-ink)" strokeWidth="3.5" fill="none" strokeLinecap="round" />
       ) : mood === 'alert' ? (
-        <ellipse cx="60" cy="70" rx="7" ry="6" fill="var(--ink)" />
+        <ellipse cx="60" cy="70" rx="7" ry="6" fill="var(--frog-ink)" />
       ) : (
-        <path d="M50 70 H70" stroke="var(--ink)" strokeWidth="3.5" strokeLinecap="round" />
+        <path d="M50 70 H70" stroke="var(--frog-ink)" strokeWidth="3.5" strokeLinecap="round" />
       )}
       {mood === 'scarf' && (
         <>

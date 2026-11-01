@@ -1,4 +1,4 @@
-import type { Project, ProjectStatus, Rule, RowNote, Tool, Yarn } from './types';
+import type { PatternRepeat, Project, ProjectStatus, Rule, RowNote, Tool, Yarn } from './types';
 
 export const newId = (): string => crypto.randomUUID();
 
@@ -19,6 +19,7 @@ export interface ProjectDraft {
   tool: Tool;
   yarns: Yarn[];
   targetRows: number | null;
+  pattern: PatternRepeat | null;
   notes: string;
 }
 
@@ -28,13 +29,16 @@ export const emptyDraft = (): ProjectDraft => ({
   tool: emptyTool(),
   yarns: [],
   targetRows: null,
+  pattern: null,
   notes: '',
 });
 
 export const MAX_NAME = 80;
 
-export function validateDraft(draft: ProjectDraft): Partial<Record<'name' | 'targetRows' | 'sizeMm', string>> {
-  const errors: Partial<Record<'name' | 'targetRows' | 'sizeMm', string>> = {};
+type DraftErrors = Partial<Record<'name' | 'targetRows' | 'sizeMm' | 'patternRows' | 'patternStart', string>>;
+
+export function validateDraft(draft: ProjectDraft): DraftErrors {
+  const errors: DraftErrors = {};
   const name = draft.name.trim();
   if (!name) errors.name = 'Как назовём проект?';
   else if (name.length > MAX_NAME) errors.name = `Не длиннее ${MAX_NAME} символов`;
@@ -43,6 +47,10 @@ export function validateDraft(draft: ProjectDraft): Partial<Record<'name' | 'tar
   }
   if (draft.tool.sizeMm !== null && !(draft.tool.sizeMm > 0 && draft.tool.sizeMm <= 50)) {
     errors.sizeMm = 'Размер от 0 до 50 мм';
+  }
+  if (draft.pattern) {
+    if (!Number.isInteger(draft.pattern.rows) || draft.pattern.rows < 1) errors.patternRows = 'Целое число от 1 или пусто';
+    if (!Number.isInteger(draft.pattern.startRow) || draft.pattern.startRow < 1) errors.patternStart = 'Целое число от 1 или пусто';
   }
   return errors;
 }
@@ -57,6 +65,7 @@ export function createProject(draft: ProjectDraft, now = new Date()): Project {
     yarns: cleanYarns(draft.yarns),
     currentRow: 1,
     targetRows: draft.targetRows,
+    pattern: draft.pattern,
     notes: draft.notes,
     rowNotes: [],
     rules: [],
@@ -74,6 +83,7 @@ export function applyDraft(project: Project, draft: ProjectDraft, now = new Date
       tool: draft.tool,
       yarns: cleanYarns(draft.yarns),
       targetRows: draft.targetRows,
+      pattern: draft.pattern,
       notes: draft.notes,
     },
     now,
@@ -87,8 +97,23 @@ export function toDraft(p: Project): ProjectDraft {
     tool: { ...p.tool },
     yarns: p.yarns.map((y) => ({ ...y })),
     targetRows: p.targetRows,
+    pattern: p.pattern ?? null,
     notes: p.notes,
   };
+}
+
+export interface PatternPosition {
+  /** Номер текущего повтора раппорта, с 1. */
+  repeat: number;
+  /** Номер ряда внутри повтора, от 1 до pattern.rows. */
+  rowInRepeat: number;
+}
+
+/** Где внутри раппорта находится ряд. null — узор ещё не начался. */
+export function patternPosition(pattern: PatternRepeat, row: number): PatternPosition | null {
+  const offset = row - pattern.startRow;
+  if (offset < 0) return null;
+  return { repeat: Math.floor(offset / pattern.rows) + 1, rowInRepeat: (offset % pattern.rows) + 1 };
 }
 
 /** Пустые строки пряжи (без названия и цвета) не сохраняем. */
@@ -108,8 +133,15 @@ export function setRow(p: Project, row: number, now = new Date()): Project {
   return touch({ ...p, currentRow: clamped, status }, now);
 }
 
-export const incrementRow = (p: Project, now?: Date) => setRow(p, p.currentRow + 1, now);
+/** Новый ряд снимает проект с паузы: раз вяжем, значит он снова в процессе. */
+export function incrementRow(p: Project, now?: Date): Project {
+  const next = setRow(p, p.currentRow + 1, now);
+  return next.status === 'paused' ? { ...next, status: 'active' } : next;
+}
+
 export const decrementRow = (p: Project, now?: Date) => setRow(p, p.currentRow - 1, now);
+
+export const setStatus = (p: Project, status: ProjectStatus, now?: Date) => touch({ ...p, status }, now);
 
 export function addRule(p: Project, value: Omit<Rule, 'id' | 'enabled'>, now?: Date): Project {
   return touch({ ...p, rules: [...p.rules, { ...value, id: newId(), enabled: true }] }, now);

@@ -20,6 +20,7 @@ export function RulesPanel({ project }: { project: Project }) {
   const [input, setInput] = useState<RuleInput>(() => emptyInput(project.currentRow));
   const [touched, setTouched] = useState(false);
   const [toDelete, setToDelete] = useState<Rule | null>(null);
+  const [custom, setCustom] = useState(false);
 
   const result = validateRuleInput(input);
   const errors = touched && !result.ok ? result.errors : {};
@@ -33,6 +34,7 @@ export function RulesPanel({ project }: { project: Project }) {
     if (!result.ok) return;
     update(project.id, (p) => addRule(p, result.value));
     setInput(emptyInput(project.currentRow));
+    setCustom(false);
     setTouched(false);
     setAdding(false);
   };
@@ -79,14 +81,41 @@ export function RulesPanel({ project }: { project: Project }) {
           <h3>Новое правило</h3>
           <div className="chips">
             {PRESETS.map((p) => (
-              <button key={p} type="button" className={`chip ${input.action === p ? 'on' : ''}`} onClick={() => set('action', p)}>
+              <button
+                key={p}
+                type="button"
+                className={`chip ${!custom && input.action === p ? 'on' : ''}`}
+                onClick={() => {
+                  setCustom(false);
+                  set('action', p);
+                }}
+              >
                 {p}
               </button>
             ))}
+            <button
+              type="button"
+              className={`chip ${custom ? 'on' : ''}`}
+              onClick={() => {
+                setCustom(true);
+                set('action', '');
+              }}
+              data-testid="rule-preset-custom"
+            >
+              Другое
+            </button>
           </div>
-          <Field label="Что сделать *" error={errors.action}>
-            <input value={input.action} onChange={(e) => set('action', e.target.value)} data-testid="rule-field-action" />
-          </Field>
+          {custom && (
+            <Field label="Что сделать *" error={errors.action}>
+              <input
+                value={input.action}
+                onChange={(e) => set('action', e.target.value)}
+                placeholder="Например, вывязать сердечко"
+                autoFocus
+                data-testid="rule-field-action"
+              />
+            </Field>
+          )}
           <div className="row3">
             <Field label="С ряда *" error={errors.startRow}>
               <input inputMode="numeric" value={input.startRow} onChange={(e) => set('startRow', e.target.value)} data-testid="rule-field-start" />

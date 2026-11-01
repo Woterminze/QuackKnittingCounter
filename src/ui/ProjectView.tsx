@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { STATUS_LABELS, TOOL_LABELS, type Project } from '../domain/types';
-import { totalMeters } from '../domain/project';
+import { STATUS_LABELS, TOOL_LABELS, type Project, type ProjectStatus } from '../domain/types';
+import { setStatus, totalMeters } from '../domain/project';
 import { useStore } from './store';
 import { navigate } from './router';
 import { ConfirmDialog, TopBar } from './common';
@@ -19,7 +19,7 @@ const TABS: { id: Tab; label: string }[] = [
 export function ProjectView({ project }: { project: Project }) {
   const [tab, setTab] = useState<Tab>('rules');
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const { remove } = useStore();
+  const { remove, update } = useStore();
 
   return (
     <>
@@ -33,6 +33,21 @@ export function ProjectView({ project }: { project: Project }) {
         }
       />
       <main className="page">
+        <div className="status-row">
+          <select
+            className={`status status-select s-${project.status}`}
+            value={project.status}
+            onChange={(e) => update(project.id, (p) => setStatus(p, e.target.value as ProjectStatus))}
+            aria-label="Статус проекта"
+            data-testid="status-select"
+          >
+            {(Object.keys(STATUS_LABELS) as ProjectStatus[]).map((s) => (
+              <option key={s} value={s}>
+                {STATUS_LABELS[s]}
+              </option>
+            ))}
+          </select>
+        </div>
         {project.status === 'done' && (
           <div className="done-banner" data-testid="done-banner">
             <Frog mood="scarf" size={72} />

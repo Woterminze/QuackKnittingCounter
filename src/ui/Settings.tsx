@@ -4,10 +4,12 @@ import type { Project } from '../domain/types';
 import { useStore } from './store';
 import { ConfirmDialog, TopBar } from './common';
 import { Frog } from './Frog';
+import { getTheme, setTheme, THEME_LABELS, type Theme } from './theme';
 
 export function Settings() {
   const { projects, replaceAll } = useStore();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [theme, setThemeState] = useState(getTheme);
   const [pending, setPending] = useState<Project[] | null>(null);
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
 
@@ -21,6 +23,11 @@ export function Settings() {
     a.click();
     URL.revokeObjectURL(url);
     setMessage({ kind: 'ok', text: `Сохранено проектов: ${backup.projects.length}` });
+  };
+
+  const chooseTheme = (next: Theme) => {
+    setTheme(next);
+    setThemeState(next);
   };
 
   const onFile = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -39,6 +46,24 @@ export function Settings() {
     <>
       <TopBar title="Настройки" back="/" />
       <main className="page">
+        <section className="card-like">
+          <h3>Тема</h3>
+          <div className="segmented">
+            {(Object.keys(THEME_LABELS) as Theme[]).map((t) => (
+              <button
+                key={t}
+                type="button"
+                className={theme === t ? 'on' : ''}
+                aria-pressed={theme === t}
+                onClick={() => chooseTheme(t)}
+                data-testid={`theme-${t}`}
+              >
+                {THEME_LABELS[t]}
+              </button>
+            ))}
+          </div>
+        </section>
+
         <section className="card-like">
           <h3>Резервная копия</h3>
           <p className="muted">

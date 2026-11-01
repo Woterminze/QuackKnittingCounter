@@ -8,6 +8,11 @@
     <link rel="icon" href="frog.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="icon-192.png" />
     <title>Ква-счёт</title>
+    <script>
+      const theme = localStorage.getItem('kva-theme');
+      const dark = theme === 'dark' || (theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Project } from '../domain/types';
 import { hitsOnRow, pluralRows, upcomingHits } from '../domain/rules';
-import { decrementRow, incrementRow, setRow, MAX_ROW } from '../domain/project';
+import { decrementRow, incrementRow, patternPosition, setRow, MAX_ROW } from '../domain/project';
 import { useStore } from './store';
 import { Frog } from './Frog';
 
@@ -62,6 +62,7 @@ export function Counter({ project }: { project: Project }) {
   };
 
   const pct = project.targetRows ? Math.min(100, Math.round(((row - 1) / project.targetRows) * 100)) : null;
+  const position = project.pattern ? patternPosition(project.pattern, row) : null;
 
   return (
     <section className="counter" aria-label="Счётчик рядов">
@@ -108,6 +109,13 @@ export function Counter({ project }: { project: Project }) {
           <div className="progress big" aria-hidden>
             <span style={{ width: `${pct}%` }} />
           </div>
+        )}
+        {project.pattern && (
+          <span className="pattern-status" data-testid="pattern-status">
+            {position
+              ? `Повтор ${position.repeat} · ряд ${position.rowInRepeat} из ${project.pattern.rows}`
+              : `Узор начнётся с ряда ${project.pattern.startRow}`}
+          </span>
         )}
       </div>
 
