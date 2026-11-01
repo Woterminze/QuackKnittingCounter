@@ -7,6 +7,7 @@
   --line: #e4ded0;
   --frog: #6fae6a;
   --frog-belly: #b9dca6;
+  --frog-ink: #23331f;
   --pad: #cfe6c4;
   --green: #4f8f52;
   --green-dark: #2f5d3a;
@@ -16,31 +17,30 @@
   --danger: #c4483e;
   --radius: 18px;
   --shadow: 0 2px 0 rgba(47, 93, 58, 0.08), 0 8px 24px rgba(47, 93, 58, 0.08);
-  color-scheme: light dark;
+  color-scheme: light;
   font-family: ui-rounded, 'SF Pro Rounded', 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--ink);
   background: var(--bg);
   -webkit-tap-highlight-color: transparent;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #14201a;
-    --surface: #1c2b23;
-    --surface-2: #24362c;
-    --ink: #e8f0e2;
-    --muted: #9fb09a;
-    --line: #30443a;
-    --frog: #6fae6a;
-    --frog-belly: #a9cf95;
-    --pad: #2c4a35;
-    --green: #7cc27e;
-    --green-dark: #a8dca6;
-    --accent-soft: #4a2a33;
-    --shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  }
-  .btn.primary, .btn-pad { color: #10200f; }
+:root[data-theme='dark'] {
+  --bg: #14201a;
+  --surface: #1c2b23;
+  --surface-2: #24362c;
+  --ink: #e8f0e2;
+  --muted: #9fb09a;
+  --line: #30443a;
+  --frog: #6fae6a;
+  --frog-belly: #a9cf95;
+  --pad: #2c4a35;
+  --green: #7cc27e;
+  --green-dark: #a8dca6;
+  --accent-soft: #4a2a33;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
 }
+[data-theme='dark'] :is(.btn.primary, .btn-pad, .chip.on, .segmented button.on, .fab) { color: #10200f; }
 
 * { box-sizing: border-box; }
 body { margin: 0; min-height: 100dvh; }
@@ -64,6 +64,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .topbar-title { flex: 1; font-size: 1.2rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .topbar-logo { display: grid; place-items: center; width: 44px; }
 .topbar-actions { display: flex; gap: 4px; }
+.topbar-actions .icon-btn { background: var(--pad); color: var(--green-dark); }
 .icon-btn {
   display: grid; place-items: center; width: 44px; height: 44px;
   border: 0; border-radius: 14px; background: transparent;
@@ -100,7 +101,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   width: 100%; min-height: 44px; padding: 0 14px; border-radius: 14px;
   border: 1.5px solid var(--line); background: var(--surface);
 }
-.chips { display: flex; gap: 8px; overflow-x: auto; padding: 12px 0; scrollbar-width: none; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 0; }
 .chip {
   flex: none; min-height: 36px; padding: 0 14px; border-radius: 999px;
   border: 1.5px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 600;
@@ -120,6 +121,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .status { flex: none; font-size: 0.78rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--surface-2); }
 .s-active { background: var(--pad); color: var(--green-dark); }
 .s-done { background: var(--accent-soft); }
+.status-row { display: flex; justify-content: center; margin-bottom: 4px; }
+.status-select { min-height: 36px; border: 0; font-size: 0.9rem; cursor: pointer; }
 .progress { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; margin-top: 12px; }
 .progress span { display: block; height: 100%; background: var(--frog); border-radius: inherit; transition: width 0.3s; }
 .progress.big { width: 100%; height: 10px; }
@@ -132,7 +135,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* Forms */
 .form { display: grid; gap: 14px; }
-.field { display: grid; gap: 6px; }
+.field { display: grid; gap: 6px; align-content: start; min-width: 0; }
 .field-label { font-weight: 700; font-size: 0.92rem; }
 .field input, .field select, .field textarea {
   width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 12px;
@@ -164,6 +167,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .counter { display: grid; gap: 14px; padding: 8px 0 16px; }
 .counter-display { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .counter-caption { color: var(--muted); font-weight: 600; }
+.pattern-status { margin-top: 8px; padding: 4px 14px; border-radius: 99px; background: var(--pad); color: var(--green-dark); font-weight: 700; }
 .row-number {
   border: 0; background: none; cursor: pointer; padding: 0 16px;
   font-size: clamp(5rem, 28vw, 8rem); font-weight: 900; line-height: 1.05; font-variant-numeric: tabular-nums;
@@ -238,6 +242,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .info dt { color: var(--muted); font-weight: 600; }
 .info dd { margin: 0; }
 .done-banner { display: flex; align-items: center; gap: 12px; padding: 8px 14px; border-radius: var(--radius); background: var(--accent-soft); font-weight: 700; }
+.card-like + .card-like { margin-top: 16px; }
 .about { display: flex; align-items: center; gap: 16px; margin-top: 24px; }
 
 /* Dialog */

@@ -33,6 +33,12 @@ export interface Rule {
   enabled: boolean;
 }
 
+/** Раппорт узора: повторяется каждые rows рядов, начиная с ряда startRow. */
+export interface PatternRepeat {
+  rows: number;
+  startRow: number;
+}
+
 export interface RowNote {
   id: string;
   row: number;
@@ -49,6 +55,8 @@ export interface Project {
   /** Номер ряда, который сейчас вяжется (≥ 1). */
   currentRow: number;
   targetRows: number | null;
+  /** В проектах, созданных до появления раппорта, поля нет. */
+  pattern?: PatternRepeat | null;
   notes: string;
   rowNotes: RowNote[];
   rules: Rule[];

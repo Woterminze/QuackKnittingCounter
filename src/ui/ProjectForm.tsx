@@ -12,12 +12,16 @@ export function ProjectForm({ project }: { project?: Project }) {
   const [draft, setDraft] = useState<ProjectDraft>(() => (project ? toDraft(project) : emptyDraft()));
   const [targetText, setTargetText] = useState(numText(draft.targetRows));
   const [sizeText, setSizeText] = useState(numText(draft.tool.sizeMm));
+  const [patternRowsText, setPatternRowsText] = useState(numText(draft.pattern?.rows ?? null));
+  const [patternStartText, setPatternStartText] = useState(numText(draft.pattern?.startRow ?? null));
   const [touched, setTouched] = useState(false);
 
+  const patternRows = parseOptionalNumber(patternRowsText);
   const full: ProjectDraft = {
     ...draft,
     targetRows: parseOptionalNumber(targetText),
     tool: { ...draft.tool, sizeMm: parseOptionalNumber(sizeText) },
+    pattern: patternRows === null ? null : { rows: patternRows, startRow: parseOptionalNumber(patternStartText) ?? 1 },
   };
   const errors = validateDraft(full);
   const show = (k: keyof typeof errors) => (touched ? errors[k] : undefined);
@@ -155,6 +159,15 @@ export function ProjectForm({ project }: { project?: Project }) {
           <Field label="Сколько рядов всего" error={show('targetRows')} hint="Необязательно — для прогресса">
             <input inputMode="numeric" value={targetText} onChange={(e) => setTargetText(e.target.value)} placeholder="120" data-testid="field-target" />
           </Field>
+
+          <div className="row2">
+            <Field label="Раппорт узора, рядов" error={show('patternRows')} hint="Необязательно — для счётчика повторов">
+              <input inputMode="numeric" value={patternRowsText} onChange={(e) => setPatternRowsText(e.target.value)} placeholder="8" data-testid="field-pattern-rows" />
+            </Field>
+            <Field label="Узор начинается с ряда" error={show('patternStart')} hint="Если пусто — с первого">
+              <input inputMode="numeric" value={patternStartText} onChange={(e) => setPatternStartText(e.target.value)} placeholder="1" data-testid="field-pattern-start" />
+            </Field>
+          </div>
 
           <Field label="Заметки">
             <textarea

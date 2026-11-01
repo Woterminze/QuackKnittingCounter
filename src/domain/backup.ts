@@ -30,6 +30,9 @@ function checkProject(p: unknown, i: number): Project {
   if (!isPosInt(p.currentRow)) throw new BackupError(`${where}: неверный номер ряда`);
   if (!isNullableNum(p.targetRows)) throw new BackupError(`${where}: неверное число рядов`);
   if (!isObj(p.tool)) throw new BackupError(`${where}: нет инструмента`);
+  if (p.pattern != null && (!isObj(p.pattern) || !isPosInt(p.pattern.rows) || !isPosInt(p.pattern.startRow))) {
+    throw new BackupError(`${where}: неверный раппорт`);
+  }
   for (const key of ['yarns', 'rowNotes', 'rules'] as const) {
     if (!Array.isArray(p[key])) throw new BackupError(`${where}: поле ${key} должно быть списком`);
   }
