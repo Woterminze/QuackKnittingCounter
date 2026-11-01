@@ -112,7 +112,9 @@ export function ProjectList() {
       </main>
       {total > 0 && (
         <a className="fab" href="#/new" aria-label="Новый проект" data-testid="new-project">
-          +
+          <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden>
+            <path d="M14 4 V24 M4 14 H24" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+          </svg>
         </a>
       )}
     </>

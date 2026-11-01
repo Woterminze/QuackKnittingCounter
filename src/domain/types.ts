@@ -31,6 +31,8 @@ export interface Rule {
   times: number | null;
   hint: string;
   enabled: boolean;
+  /** Ряды, где действие отмечено выполненным. В старых правилах поля нет. */
+  doneRows?: number[];
 }
 
 /** Раппорт узора: повторяется каждые rows рядов, начиная с ряда startRow. */

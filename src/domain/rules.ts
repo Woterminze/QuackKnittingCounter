@@ -53,6 +53,19 @@ export function isFinished(rule: Rule, currentRow: number): boolean {
   return last !== null && currentRow > last;
 }
 
+export const isDone = (rule: Rule, row: number): boolean => rule.doneRows?.includes(row) ?? false;
+
+/** Пройденные ряды, где правило сработало, а действие не отмечено. */
+export function missedRows(rule: Rule, currentRow: number): number[] {
+  const done = new Set(rule.doneRows);
+  const rows: number[] = [];
+  for (let row = rule.startRow; row < currentRow; row += rule.every) {
+    if (occurrenceOnRow(rule, row) === null) break;
+    if (!done.has(row)) rows.push(row);
+  }
+  return rows;
+}
+
 /** Ближайшее срабатывание строго после ряда row. */
 export function nextHit(rule: Rule, row: number): NextHit | null {
   if (!rule.enabled) return null;

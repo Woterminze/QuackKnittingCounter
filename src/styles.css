@@ -40,7 +40,7 @@
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   color-scheme: dark;
 }
-[data-theme='dark'] :is(.btn.primary, .btn-pad, .chip.on, .segmented button.on, .fab) { color: #10200f; }
+[data-theme='dark'] :is(.btn.primary, .btn-pad, .chip.on, .segmented button.on, .fab, .check-btn.on) { color: #10200f; }
 
 * { box-sizing: border-box; }
 body { margin: 0; min-height: 100dvh; }
@@ -130,8 +130,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .fab {
   position: fixed; right: max(20px, calc(50vw - 260px)); bottom: calc(24px + env(safe-area-inset-bottom));
   width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
-  background: var(--green); color: #fff; font-size: 2.2rem; text-decoration: none; box-shadow: var(--shadow);
+  background: var(--green); color: #fff; text-decoration: none; box-shadow: var(--shadow);
+  transition: transform 0.15s; animation: pop 0.35s cubic-bezier(0.2, 1.6, 0.4, 1);
 }
+.fab:active { transform: scale(0.92); }
 
 /* Forms */
 .form { display: grid; gap: 14px; }
@@ -201,6 +203,15 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .reminder strong { font-size: 1.1rem; }
 .reminder-frog { flex: none; animation: hop 0.6s ease-out; }
+.reminder-text { flex: 1; min-width: 0; }
+.reminder.done { background: var(--surface-2); border-color: var(--line); }
+.check-btn {
+  flex: none; min-height: 44px; padding: 0 12px; border-radius: 12px; cursor: pointer; font-weight: 700;
+  border: 1.5px solid var(--green); background: transparent; color: var(--green-dark);
+}
+.check-btn.on { background: var(--green); color: #fff; }
+.missed { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.missed li { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radius); background: var(--accent-soft); }
 
 .upcoming { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
 .upcoming li { display: flex; justify-content: space-between; gap: 8px; padding: 8px 12px; border-radius: 12px; background: var(--surface-2); font-size: 0.95rem; }
@@ -253,6 +264,31 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .dialog-actions { display: flex; gap: 10px; justify-content: center; }
 .error-bar { padding: 10px 16px; background: var(--danger); color: #fff; font-weight: 600; }
 
+/* Появление экранов и блоков. Без заливки вперёд, чтобы не перебивать :active. */
+.page { animation: rise 0.22s ease-out; }
+.tabs + section { animation: rise 0.2s ease-out; }
+.cards li { animation: rise 0.25s ease-out backwards; }
+.cards li:nth-child(2) { animation-delay: 0.04s; }
+.cards li:nth-child(3) { animation-delay: 0.08s; }
+.cards li:nth-child(4) { animation-delay: 0.12s; }
+.cards li:nth-child(n + 5) { animation-delay: 0.16s; }
+.missed li, .rule, .note { animation: rise 0.2s ease-out; }
+.dialog[open] { animation: pop 0.25s cubic-bezier(0.2, 1.6, 0.4, 1); }
+.dialog[open]::backdrop { animation: fade-in 0.2s; }
+.done-banner { animation: pop 0.45s cubic-bezier(0.2, 1.6, 0.4, 1); }
+.empty svg { animation: float 3s ease-in-out infinite; }
+
+/* Счётчик: номер подпрыгивает при смене ряда */
+.row-value { display: inline-block; animation: bump 0.22s ease-out; }
+.check-btn { transition: background 0.15s, color 0.15s, transform 0.08s; }
+.check-btn:active { transform: scale(0.94); }
+.check-btn.on { animation: pop 0.3s cubic-bezier(0.2, 1.6, 0.4, 1); }
+.reminder { transition: background 0.2s, border-color 0.2s; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes bump { from { transform: scale(0.82); opacity: 0.5; } to { transform: none; opacity: 1; } }
+@keyframes float { 50% { transform: translateY(-6px); } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pop { from { transform: scale(0.85); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes hop { 0% { transform: translateY(16px); } 50% { transform: translateY(-10px); } 100% { transform: none; } }
 @keyframes wobble { 25% { transform: rotate(-4deg); } 75% { transform: rotate(4deg); } }

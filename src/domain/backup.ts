@@ -40,6 +40,9 @@ function checkProject(p: unknown, i: number): Project {
     if (!isObj(r) || !isStr(r.action) || !isPosInt(r.startRow) || !isPosInt(r.every) || !(r.times === null || isPosInt(r.times))) {
       throw new BackupError(`${where}: неверное правило`);
     }
+    if (r.doneRows !== undefined && !(Array.isArray(r.doneRows) && r.doneRows.every(isPosInt))) {
+      throw new BackupError(`${where}: неверные отметки правила`);
+    }
   }
   for (const n of p.rowNotes as unknown[]) {
     if (!isObj(n) || !isPosInt(n.row) || !isStr(n.text)) throw new BackupError(`${where}: неверная заметка`);

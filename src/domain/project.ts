@@ -130,7 +130,9 @@ export const MAX_ROW = 100000;
 export function setRow(p: Project, row: number, now = new Date()): Project {
   const clamped = Math.min(MAX_ROW, Math.max(1, Math.trunc(row)));
   const status: ProjectStatus = p.status === 'planned' && clamped > 1 ? 'active' : p.status;
-  return touch({ ...p, currentRow: clamped, status }, now);
+  // Распущенные ряды вяжутся заново, их отметки больше не действуют.
+  const rules = p.rules.map((r) => (r.doneRows ? { ...r, doneRows: r.doneRows.filter((row) => row <= clamped) } : r));
+  return touch({ ...p, currentRow: clamped, status, rules }, now);
 }
 
 /** Новый ряд снимает проект с паузы: раз вяжем, значит он снова в процессе. */
@@ -149,6 +151,18 @@ export function addRule(p: Project, value: Omit<Rule, 'id' | 'enabled'>, now?: D
 
 export function updateRule(p: Project, rule: Rule, now?: Date): Project {
   return touch({ ...p, rules: p.rules.map((r) => (r.id === rule.id ? rule : r)) }, now);
+}
+
+export function setRuleDone(p: Project, ruleId: string, rows: number[], done: boolean, now?: Date): Project {
+  const mark = (r: Rule): Rule => {
+    const marked = new Set(r.doneRows);
+    for (const row of rows) {
+      if (done) marked.add(row);
+      else marked.delete(row);
+    }
+    return { ...r, doneRows: [...marked].sort((a, b) => a - b) };
+  };
+  return touch({ ...p, rules: p.rules.map((r) => (r.id === ruleId ? mark(r) : r)) }, now);
 }
 
 export function removeRule(p: Project, ruleId: string, now?: Date): Project {
